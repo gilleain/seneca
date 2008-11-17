@@ -12,6 +12,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -239,7 +240,7 @@ public class TestFramework extends JFrame
 //		Judge judge = new SimpleHOSECodeJudge(targetMolecule);
 		judge.addJudgeListener(this);
 
-		MoleculeAnnealerAdapter adapter
+		final MoleculeAnnealerAdapter adapter
 			= new MoleculeAnnealerAdapter(startingMolecule, judge);
 		adapter.addStateListener(this);
 
@@ -256,17 +257,28 @@ public class TestFramework extends JFrame
 			public void run() {
 //				MoleculeAnnealerAdapter result = (MoleculeAnnealerAdapter) annealingEngine.run();
 				annealingEngine.run();
+				finishUp(adapter);
 			}
 		};
 		runThread.start();
+
+	}
+
+	private void finishUp(MoleculeAnnealerAdapter adapter) {
 		IMolecule outcome = adapter.getBest();
 		storeStep();
 		int firstHighest = this.findFirstHighest();
 		if (firstHighest != -1) {
 			System.err.println("selecting index " + firstHighest);
 			this.stepList.setSelectedIndex(firstHighest);
+
+			Rectangle cell
+				= this.stepList.getCellBounds(firstHighest, firstHighest);
+			this.stepList.scrollRectToVisible(cell);
 			this.fullScoreGraphPanel.setSelectedStep(firstHighest);
 			this.temperatureGraphPanel.setSelectedStep(firstHighest);
+		} else {
+			System.err.println("no selected index");
 		}
 		try {
 			this.finalMoleculePanel.setMolecule(outcome);
