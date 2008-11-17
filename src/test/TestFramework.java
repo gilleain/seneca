@@ -153,10 +153,10 @@ public class TestFramework extends JFrame
 		displayPanel.add(spectrumPanel);
 		this.add(displayPanel, BorderLayout.EAST);
 
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setPreferredSize(new Dimension(900, 800));
 		this.pack();
 		this.setVisible(true);
-
 	}
 
 	private void setup() {

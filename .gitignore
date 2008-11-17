@@ -1,0 +1,4 @@
+bin
+*.csv
+.classpath
+.project
