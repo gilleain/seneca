@@ -1,7 +1,6 @@
 package spectrum;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -10,13 +9,13 @@ import org.openscience.cdk.tools.BremserOneSphereHOSECodePredictor;
 import org.openscience.cdk.tools.HOSECodeGenerator;
 
 public class SimpleHOSECodeJudge implements Judge {
-	
+
 	private final ArrayList<JudgeListener> listeners = new ArrayList<JudgeListener>();
 	private HOSECodeGenerator hcg;
 	private BremserOneSphereHOSECodePredictor bos;
 	private Spectrum currentSpectrum;
 	private int counter;
-	
+
 	public SimpleHOSECodeJudge(IMolecule targetMolecule) {
 		this.hcg = new HOSECodeGenerator();
 		this.bos = new BremserOneSphereHOSECodePredictor();
@@ -27,21 +26,19 @@ public class SimpleHOSECodeJudge implements Judge {
 	public void addJudgeListener(JudgeListener listener) {
 		this.listeners.add(listener);
 	}
-	
+
 	private void fireChangeEvent(Spectrum spectrum, double score) {
 		for (JudgeListener listener : this.listeners) {
 			listener.predictionChanged(new PredictionEvent(spectrum, score));
 		}
 	}
-	
+
 	private Spectrum predict(IMolecule other) {
-		Iterator<IAtom> atoms = other.atoms();
-		Spectrum spectrum = new Spectrum(counter); 
-		while (atoms.hasNext()) {
-			IAtom atom = atoms.next();
+		Spectrum spectrum = new Spectrum(counter);
+		for (IAtom atom : other.atoms()) {
 			if (atom.getSymbol().equals("C")) {
 				try {
-					String hoseCode 
+					String hoseCode
 						= hcg.makeBremserCompliant(hcg.getHOSECode(other, atom, 1));
 					double shift = this.bos.predict(hoseCode);
 					spectrum.addSignal((float)shift);

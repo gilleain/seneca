@@ -15,6 +15,7 @@ import org.openscience.cdk.renderer.Renderer2DModel;
 import org.openscience.cdk.renderer.Java2DRenderer;
 import org.openscience.cdk.smiles.SmilesParser;
 
+@SuppressWarnings("serial")
 public class MoleculePanel extends JPanel {
 
 	private String name;
@@ -35,11 +36,11 @@ public class MoleculePanel extends JPanel {
 		this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.setBackground(Color.WHITE);
 	}
-	
+
 	public void clear() {
 		this.molecule = null;
 	}
-	
+
 	public void setMolecule(String smiles) throws Exception {
 		this.setMolecule(this.smilesParser.parseSmiles(smiles));
 	}

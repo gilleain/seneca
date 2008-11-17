@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -22,12 +21,13 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 
 public class PredictionTool {
-	
-	private static HashMap mapsmap = new HashMap();
+
+	private HashMap<String, HashMap<String, Double>> mapsmap
+		= new HashMap<String, HashMap<String, Double>>();
 
 	/**
 	 *Constructor for the PredictionTool object
-	 * 
+	 *
 	 * @exception IOException
 	 *                Problems reading the HOSE code file.
 	 */
@@ -38,11 +38,11 @@ public class PredictionTool {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(ins));
 		this.readCSVFile(reader);
 	}
-	
+
 	public PredictionTool(String filename) throws IOException {
 		this.readCSVFile(new BufferedReader(new FileReader(filename)));
 	}
-	
+
 	private void readCSVFile(BufferedReader reader) throws IOException {
 		String input;
 		while ((input = reader.readLine()) != null) {
@@ -52,9 +52,9 @@ public class PredictionTool {
 			st2.nextToken();	// throw away minimum
 			Double av = new Double(st2.nextToken());
 			st2.nextToken();	// throw away maximum
-			HashMap map = (HashMap)mapsmap.get(symbol);
+			HashMap<String, Double> map = mapsmap.get(symbol);
 			if (map == null) {
-				map = new HashMap();
+				map = new HashMap<String, Double>();
 				mapsmap.put(symbol, map);
 			}
 			map.put(code, av);
@@ -63,7 +63,7 @@ public class PredictionTool {
 
 	/**
 	 * This method does a prediction.
-	 * 
+	 *
 	 * @param comment
 	 *            Contains additional text after processing predictRange().
 	 * @param mol
@@ -74,15 +74,15 @@ public class PredictionTool {
 	 *            Restrict number of spheres to use, to use max spheres set -1.
 	 * @return Average
 	 */
-	public static float predict(IMolecule mol, IAtom a) {
-		
+	public float predict(IMolecule mol, IAtom a) {
+
 		int maxSpheresToUse = 6;
-		
+
 		HOSECodeGenerator hcg = new HOSECodeGenerator();
 		int spheres;
 		for (spheres = maxSpheresToUse; spheres > 0; spheres--) {
 			StringBuffer hoseCodeBuffer = new StringBuffer();
-			StringTokenizer st; 
+			StringTokenizer st;
 			try {
 				st = new StringTokenizer(
 							hcg.getHOSECode(mol, a, maxSpheresToUse), "()/");
@@ -105,9 +105,9 @@ public class PredictionTool {
 			}
 			String hoseCode = hoseCodeBuffer.toString();
 			String symbol = a.getSymbol();
-			HashMap map = (HashMap) mapsmap.get(symbol);
+			HashMap<String, Double> map = mapsmap.get(symbol);
 			Double d = ((Double) map.get(hoseCode));
-			
+
 			if (d != null) {
 				return d.floatValue();
 			}
@@ -117,7 +117,7 @@ public class PredictionTool {
 
 	/**
 	 * The main program for the PredictionTool class.
-	 * 
+	 *
 	 * @param args
 	 *            The file name of the test mdl file.
 	 * @exception Exception
@@ -127,7 +127,7 @@ public class PredictionTool {
 		MDLV2000Reader mdlreader = new MDLV2000Reader(new FileReader(args[0]));
 		IMolecule mol = (IMolecule) mdlreader.read(new Molecule());
 		mol = (IMolecule) AtomContainerManipulator.removeHydrogens(mol);
-	
+
 		CDKHydrogenAdder.getInstance(
 				DefaultChemObjectBuilder.getInstance()).addImplicitHydrogens(mol);
 		for (int i = 0; i < mol.getAtomCount(); i++) {
@@ -136,9 +136,8 @@ public class PredictionTool {
 		}
 		CDKHueckelAromaticityDetector.detectAromaticity(mol);
 		PredictionTool predictor = new PredictionTool();
-		Iterator<IAtom> atoms = mol.atoms();
-		while (atoms.hasNext()) {
-			float result = predictor.predict(mol, atoms.next());
+		for (IAtom atom : mol.atoms()) {
+			float result = predictor.predict(mol, atom);
 			System.out.println(result);
 		}
 	}
